@@ -23,16 +23,49 @@
         }; 
     
     root.Lxc = {
-        create: function(name, template, complete, data) {
+        create: function(name, template, complete, out) {
             ShortCuts.run('lxc-create', {
                 '-n': name,
                 '-t': template
-            }, complete, data);
+            }, complete, out);
         },
-        destroy: function(name, complete, data) {
+        destroy: function(name, complete, out) {
             ShortCuts.run('lxc-destroy', {
                 '-n': name
-            }, complete, data);
+            }, complete, out);
+        },
+        start: function(name, complete, out) {
+            ShortCuts.run('lxc-start', {
+                '-n': name,
+                '-d': ' '
+            }, complete, out);
+        },
+        stop: function(name, complete, out) {
+            ShortCuts.run('lxc-stop', {
+                '-n': name
+            }, complete, out);
+        },
+        info: function(name, complete, out) {
+            var output = '';
+
+            // info command run
+            ShortCuts.run('lxc-info', { '-n': name }, function() {
+                var infoList = output.split("\n"),
+                    Info = {};
+
+                // each list
+                _.forEach(infoList, function(prop) {
+                    var split = prop.split(':'),
+                        key = split[0].trim();
+                    
+                    // add object key: val
+                    if (!Info[key] && split[1]) Info[key] = split[1].trim();
+                });
+
+                // callback argument info object
+                complete(Info);
+
+            }, function(data) { output += data; });
         }
     };
 }).call(this);
