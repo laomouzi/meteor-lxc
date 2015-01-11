@@ -1,71 +1,47 @@
 (function() {
     var root = this,
-        child = Npm.require('child'),
+        child = Npm.require('child_process'),
         ShortCuts = {
-            run: function(command, argsObj, complete, out) { 
-                var args = '';
+            run: function(command, complete, stdout) { 
 
-                // append args string
-                _.each(argsObj, function(val, key) { args += key + ' ' + val + ' ';  });
+                // run command
+                var C = child.exec(command, function() {
+                    stdout && stdout.apply(this, arguments);
+                });
 
-                // Runn
-                child({
-                    command: command,
-                    args: args.split(' '),
-                    cbStdout: function(data) {
-                        out && out(''+data, argsObj['-n'], argsObj['-t']);
-                    },
-                    cbClose : function(exitCode) {
-                        complete(!!exitCode, argsObj['-n'], argsObj['-t']);
-                    }
-                }).start();
+                // exit
+                C.on('exit', function(code) {
+                    complete(!!code);
+                });
             }
         }; 
     
     root.Lxc = {
-        create: function(name, template, complete, out) {
-            ShortCuts.run('lxc-create', {
-                '-n': name,
-                '-t': template
-            }, complete, out);
+        create: function(name, template, complete) {
+            ShortCuts.run('lxc-create -n ' + name + ' -t' + template, complete);
         },
-        destroy: function(name, complete, out) {
-            ShortCuts.run('lxc-destroy', {
-                '-n': name
-            }, complete, out);
+        destroy: function(name, complete) {
+            ShortCuts.run('lxc-destroy -n ' + name, complete);
         },
-        start: function(name, complete, out) {
-            ShortCuts.run('lxc-start', {
-                '-n': name,
-                '-d': ' '
-            }, complete, out);
+        start: function(name, complete) {
+            ShortCuts.run('lxc-start -n ' + name + ' -d', complete);
         },
         stop: function(name, complete, out) {
-            ShortCuts.run('lxc-stop', {
-                '-n': name
-            }, complete, out);
+            ShortCuts.run('lxc-stop -n ' + name, complete);
         },
-        info: function(name, complete, out) {
-            var output = '';
-
-            // info command run
-            ShortCuts.run('lxc-info', { '-n': name }, function() {
-                var infoList = output.split("\n"),
-                    Info = {};
-
-                // each list
-                _.forEach(infoList, function(prop) {
-                    var split = prop.split(':'),
-                        key = split[0].trim();
-                    
-                    // add object key: val
-                    if (!Info[key] && split[1]) Info[key] = split[1].trim();
+        info: function(name, complete) {
+            ShortCuts.run('lxc-info -n ' + name, function() {}, function(err, out) {
+                var Info= {},
+                    output = out.split("\n");
+                _.forEach(output, function(key) {
+                    var split = key.split(':'),
+                        key = split[0];
+                    if (!Info[key] && split[1]) {
+                        Info[key.toLowerCase()] = split[1].trim();
+                    }
                 });
-
-                // callback argument info object
-                complete(Info);
-
-            }, function(data) { output += data; });
+                complete && complete(!!err, Info);
+            });
         }
     };
 }).call(this);
