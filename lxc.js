@@ -3,15 +3,14 @@
         child = Npm.require('child_process'),
         ShortCuts = {
             run: function(command, complete, stdout) { 
-
-                // run command
                 var C = child.exec(command, function() {
-                    stdout && stdout.apply(this, arguments);
-                });
+                        stdout && stdout.apply(this, arguments);
+                    }),
+                    match = command.match(/-n (.*)/g);
 
                 // exit
                 C.on('exit', function(code) {
-                    complete(!!code);
+                    complete(!!code, match[0].split(' ')[1]); // error, name
                 });
             },
             outputEach: function(out, callback) {
@@ -21,7 +20,7 @@
                 });
             }
         }; 
-    
+
     root.Lxc = {
         create: function(name, template, complete) {
             ShortCuts.run('lxc-create -n ' + name + ' -t' + template, complete);
