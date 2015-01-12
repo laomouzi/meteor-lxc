@@ -15,9 +15,9 @@ The simple way *(default template is Ubuntu)*:
 
 ```js
 Lxc.create('example', 'ubuntu', function(err) {
-  if (!err) {
-      console.log('created example.');
-  }
+    if (!err) {
+        console.log('created example.');
+    }
 });
 ```
 
@@ -25,9 +25,9 @@ Lxc.create('example', 'ubuntu', function(err) {
 
 ```js
 Lxc.start('example', function(err) {
-  if (!err) {
-      console.log('example started.');
-  }
+    if (!err) {
+        console.log('example started.');
+    }
 });
 ```
 
@@ -35,9 +35,9 @@ Lxc.start('example', function(err) {
 
 ```js
 Lxc.stop('example', function(err) {
-  if (!err) {
-      console.log('example stoped.');
-  }
+    if (!err) {
+        console.log('example stoped.');
+    }
 });
 ```
 
@@ -45,8 +45,18 @@ Lxc.stop('example', function(err) {
 
 ```js
 Lxc.destroy('example', function(err) {
-  if (!err) {
-      console.log('example destroy.');
-  }
+    if (!err) {
+        console.log('example destroyed.');
+    }
+});
+```
+
+**Get container infos::**
+
+```js
+Lxc.info('example', function(err, info) { 
+    if (!err) {
+      console.log(info); // { name: 'example', state: 'RUNNING', pid: '2324', ip: '10.0.3.139' }
+    }
 });
 ```
