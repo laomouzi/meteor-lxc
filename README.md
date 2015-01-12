@@ -64,9 +64,9 @@ Lxc.info('example', function(err, info) {
 **Clone container:**
 
 ```js
-Lxc.clone('example', 'example2', function(err, info) { 
+Lxc.clone('example', 'example2', function(err) { 
     if (!err) {
-      console.log(info); // { name: 'example', state: 'RUNNING', pid: '2324', ip: '10.0.3.139' }
+      console.log('clone and started example2.');
     }
 }, true); // true then clone and start 
 ```
