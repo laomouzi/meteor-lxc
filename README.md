@@ -51,7 +51,7 @@ Lxc.destroy('example', function(err) {
 });
 ```
 
-**Get container infos::**
+**Get container infos:**
 
 ```js
 Lxc.info('example', function(err, info) { 
@@ -59,4 +59,14 @@ Lxc.info('example', function(err, info) {
       console.log(info); // { name: 'example', state: 'RUNNING', pid: '2324', ip: '10.0.3.139' }
     }
 });
+```
+
+**Clone container:**
+
+```js
+Lxc.clone('example', 'example2', function(err, info) { 
+    if (!err) {
+      console.log(info); // { name: 'example', state: 'RUNNING', pid: '2324', ip: '10.0.3.139' }
+    }
+}, true); // true then clone and start 
 ```
