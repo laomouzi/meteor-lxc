@@ -13,6 +13,12 @@
                 C.on('exit', function(code) {
                     complete(!!code);
                 });
+            },
+            outputEach: function(out, callback) {
+                var output = out.split("\n");
+                _.forEach(output, function(d) {
+                    callback(d);
+                });
             }
         }; 
     
@@ -31,16 +37,38 @@
         },
         info: function(name, complete) {
             ShortCuts.run('lxc-info -n ' + name, function() {}, function(err, out) {
-                var Info= {},
-                    output = out.split("\n");
-                _.forEach(output, function(key) {
-                    var split = key.split(':'),
-                        key = split[0];
-                    if (!Info[key] && split[1]) {
-                        Info[key.toLowerCase()] = split[1].trim();
+                var Info= {};
+                ShortCuts.outputEach(out, function(d) {
+                    var list = d.split(':'),
+                        key = list[0],
+                        val = list[1];
+                    if (!Info[key] && val) {
+                        Info[key.toLowerCase()] = val.trim();
                     }
                 });
                 complete && complete(!!err, Info);
+            });
+        },
+        ls: function(complete) {
+            ShortCuts.run('lxc-ls --fancy', function() {}, function(err, out) {
+                var result = { RUNNING: [], STOPPED: [] };
+                if (!err) {
+                    ShortCuts.outputEach(out, function(d) {
+                        var list = _.compact(d.split(' ')),
+                            islabel = list[0] == 'NAME' || list.length === 1;
+                        if (!islabel && list.length) {
+                            // NAME, STATE, IPV4, IPV6, AUTOSTART
+                            result[list[1]].push({
+                                name: list[0],
+                                state: list[1],
+                                ipv4: list[2],
+                                ipv6: list[3],
+                                autostart: list[4]
+                            });
+                        }
+                    }); 
+                    complete(result);
+                }
             });
         }
     };
