@@ -49,6 +49,20 @@
                 complete && complete(!!err, Info);
             });
         },
+        clone: function(name, newname, complete, start) {
+            var self = this;
+            ShortCuts.run('lxc-clone -o '+ name +' -n ' + newname, function(err) {
+
+                // if not error and start then
+                if (!err && start) {
+
+                    // start
+                    self.start(newname, complete);
+
+                // if error or completed then 
+                } else { complete(err); }
+            });
+        },
         ls: function(complete) {
             ShortCuts.run('lxc-ls --fancy', function() {}, function(err, out) {
                 var result = { RUNNING: [], STOPPED: [] };
