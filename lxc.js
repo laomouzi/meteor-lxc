@@ -1,17 +1,24 @@
 (function() {
     var root = this,
-        child = Npm.require('child_process'),
+        Future = Npm.require('fibers/future'),
+        Child = Npm.require('child_process'),
         ShortCuts = {
-            run: function(command, complete, stdout) { 
-                var C = child.exec(command, function() {
-                        stdout && stdout.apply(this, arguments);
-                    }),
-                    match = command.match(/-n (.*)/g);
+            run: function(command, callback) { 
+                var fut = new Future(),
+                    C = Child.exec(command, function(err, data) {
+                        callback && callback(data);
+                    });
 
                 // exit
-                C.on('exit', function(code) {
-                    complete(!!code, match[0].split(' ')[1]); // error, name
+                C.on('exit', function(err) {
+                    fut.return({
+                        complete: function(callback) {
+                            var match = command.match(/-n (.*)/g);
+                            callback(!!err, match[0].split(' ')[1]);
+                        }
+                    });
                 });
+                return fut.wait();
             },
             outputEach: function(out, callback) {
                 var output = out.split("\n");
@@ -22,20 +29,20 @@
         }; 
 
     root.Lxc = {
-        create: function(name, template, complete) {
-            ShortCuts.run('lxc-create -n ' + name + ' -t' + template, complete);
+        create: function(name, template) {
+            return ShortCuts.run('lxc-create -n ' + name + ' -t' + (template || 'ubuntu'));
         },
-        destroy: function(name, complete) {
-            ShortCuts.run('lxc-destroy -n ' + name, complete);
+        destroy: function(name) {
+            return ShortCuts.run('lxc-destroy -n ' + name);
         },
-        start: function(name, complete) {
-            ShortCuts.run('lxc-start -n ' + name + ' -d', complete);
+        start: function(name) {
+            return ShortCuts.run('lxc-start -n ' + name + ' -d');
         },
-        stop: function(name, complete, out) {
-            ShortCuts.run('lxc-stop -n ' + name, complete);
+        stop: function(name) {
+            return ShortCuts.run('lxc-stop -n ' + name);
         },
         info: function(name, complete) {
-            ShortCuts.run('lxc-info -n ' + name, function() {}, function(err, out) {
+            ShortCuts.run('lxc-info -n ' + name, function(out) {
                 var Info= {};
                 ShortCuts.outputEach(out, function(d) {
                     var list = d.split(':'),
@@ -45,43 +52,30 @@
                         Info[key.toLowerCase()] = val.trim();
                     }
                 });
-                complete && complete(!!err, Info);
+                complete && complete(Info);
             });
         },
-        clone: function(name, newname, complete, start) {
-            var self = this;
-            ShortCuts.run('lxc-clone -o '+ name +' -n ' + newname, function(err) {
-
-                // if not error and start then
-                if (!err && start) {
-
-                    // start
-                    self.start(newname, complete);
-
-                // if error or completed then 
-                } else { complete(err); }
-            });
+        clone: function(name, newname) {
+            return ShortCuts.run('lxc-clone -o '+ name +' -n ' + newname);
         },
         ls: function(complete) {
-            ShortCuts.run('lxc-ls --fancy', function() {}, function(err, out) {
+            ShortCuts.run('lxc-ls --fancy', function(out) {
                 var result = { RUNNING: [], STOPPED: [] };
-                if (!err) {
-                    ShortCuts.outputEach(out, function(d) {
-                        var list = _.compact(d.split(' ')),
-                            islabel = list[0] == 'NAME' || list.length === 1;
-                        if (!islabel && list.length) {
-                            // NAME, STATE, IPV4, IPV6, AUTOSTART
-                            result[list[1]].push({
-                                name: list[0],
-                                state: list[1],
-                                ipv4: list[2],
-                                ipv6: list[3],
-                                autostart: list[4]
-                            });
-                        }
-                    }); 
-                    complete(result);
-                }
+                ShortCuts.outputEach(out, function(d) {
+                    var list = _.compact(d.split(' ')),
+                        islabel = list[0] == 'NAME' || list.length === 1;
+                    if (!islabel && list.length) {
+                        // NAME, STATE, IPV4, IPV6, AUTOSTART
+                        result[list[1]].push({
+                            name: list[0],
+                            state: list[1],
+                            ipv4: list[2],
+                            ipv6: list[3],
+                            autostart: list[4]
+                        });
+                    }
+                }); 
+                complete(result);
             });
         }
     };
