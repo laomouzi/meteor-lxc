@@ -30,7 +30,7 @@
 
     root.Lxc = {
         create: function(name, template) {
-            return ShortCuts.run('lxc-create -n ' + name + ' -t' + (template || 'ubuntu'));
+            return ShortCuts.run('lxc-create -n ' + name + ' -t ' + (template || 'ubuntu'));
         },
         destroy: function(name) {
             return ShortCuts.run('lxc-destroy -n ' + name);
