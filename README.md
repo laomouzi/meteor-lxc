@@ -14,7 +14,7 @@ $ meteor add yasaricli:lxc
 The simple way *(default template is Ubuntu)*:
 
 ```js
-Lxc.create('example', 'ubuntu', function(err, name) {
+Lxc.create('example', 'ubuntu').complete(function(err, name) {
     if (!err) {
         console.log('created ' + name);
     }
@@ -24,7 +24,7 @@ Lxc.create('example', 'ubuntu', function(err, name) {
 **Start container:**
 
 ```js
-Lxc.start('example', function(err, name) {
+Lxc.start('example').complete(function(err, name) {
     if (!err) {
         console.log(name + ' started.');
     }
@@ -34,7 +34,7 @@ Lxc.start('example', function(err, name) {
 **Stop container:**
 
 ```js
-Lxc.stop('example', function(err, name) {
+Lxc.stop('example').complete(function(err, name) {
     if (!err) {
         console.log(name + ' stoped.');
     }
@@ -44,7 +44,7 @@ Lxc.stop('example', function(err, name) {
 **Destroy container:**
 
 ```js
-Lxc.destroy('example', function(err, name) {
+Lxc.destroy('example').complete(function(err, name) {
     if (!err) {
         console.log(name + ' destroyed.');
     }
@@ -64,7 +64,7 @@ Lxc.info('example', function(err, info) {
 **Clone container:**
 
 ```js
-Lxc.clone('example', 'example2', function(err, name) { 
+Lxc.clone('example', 'example2').complete(function(err, name) { 
     if (!err) {
       console.log('clone and started ' + name);
     }
