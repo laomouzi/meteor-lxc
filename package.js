@@ -1,7 +1,7 @@
 Package.describe({
     name: 'yasaricli:lxc',
     summary: 'LXC Linux Containers Interface for meteor',
-    version: '0.0.5',
+    version: '0.0.6',
     git: 'https://github.com/yasaricli/meteor-lxc.git'
 });
 
