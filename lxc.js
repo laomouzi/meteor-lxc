@@ -15,7 +15,7 @@
                                             key = list[0],
                                             val = list[1];
                                         if (!Info[key] && val) {
-                                            Info[key.toLowerCase()] = val.trim();
+                                            Info[slugify(key.toLowerCase(), '')] = val.trim();
                                         }
                                     });
                                     callback(Info);
