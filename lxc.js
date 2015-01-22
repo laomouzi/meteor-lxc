@@ -63,6 +63,9 @@
         },
         info: function(name) {
             return ShortCuts.run('lxc-info -n ' + name, true);
+        },
+        attach: function(name, command) {
+            return ShortCuts.run('lxc-attach -n ' + name + ' -- ' + command);
         }
     };
 }).call(this);
